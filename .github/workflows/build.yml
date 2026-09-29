@@ -19,6 +19,9 @@ jobs:
     # so this has to run on an Apple Silicon macOS 26 image
     runs-on: macos-26
     timeout-minutes: 360
+    env:
+      # bazel disk cache, persisted between runs with actions/cache
+      BAZEL_CACHE_DIR: /Users/Shared/bazel-disk-cache
 
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +34,7 @@ jobs:
         run: |
           XCODE_VERSION=$(cat versions.json | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["xcode"]);')
           sudo xcode-select -s /Applications/Xcode_$XCODE_VERSION.app/Contents/Developer
+          echo "XCODE_VERSION=$XCODE_VERSION" >> $GITHUB_ENV
           xcodebuild -version
 
       - name: Create canonical source directory
@@ -40,6 +44,14 @@ jobs:
           # move instead of copy to avoid doubling the disk usage of the checkout
           mv "$GITHUB_WORKSPACE" /Users/Shared/telegram-ios
           mkdir -p "$GITHUB_WORKSPACE"
+
+      - name: Restore bazel cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.BAZEL_CACHE_DIR }}
+          key: bazel-${{ runner.os }}-${{ runner.arch }}-xcode${{ env.XCODE_VERSION }}-${{ github.run_id }}
+          restore-keys: |
+            bazel-${{ runner.os }}-${{ runner.arch }}-xcode${{ env.XCODE_VERSION }}-
 
       - name: Build the App
         working-directory: /Users/Shared/telegram-ios
@@ -64,28 +76,29 @@ jobs:
           echo "APP_VERSION=$(echo $APP_VERSION)" >> $GITHUB_ENV
 
           python3 build-system/Make/ImportCertificates.py --path build-system/fake-codesigning/certs
+          # Make.py copies Telegram.ipa and Telegram.DSYMs.zip from bazel-bin into
+          # build/artifacts; bazel-out config directory names change between bazel
+          # versions, so don't glob them here
+          rm -rf build/artifacts
           python3 -u build-system/Make/Make.py \
             --bazelUserRoot="$BAZEL_USER_ROOT" \
+            --cacheDir="$BAZEL_CACHE_DIR" \
             build \
             --configurationPath="build-system/appstore-configuration.json" \
             --codesigningInformationPath=build-system/fake-codesigning \
             --configuration=release_arm64 \
-            --buildNumber="$BUILD_NUMBER"
+            --buildNumber="$BUILD_NUMBER" \
+            --outputBuildArtifactsPath=build/artifacts
 
-          # collect ipa
-          OUTPUT_PATH="build/artifacts"
-          rm -rf "$OUTPUT_PATH"
-          mkdir -p "$OUTPUT_PATH"
-          for f in bazel-out/applebin_ios-ios_arm*-opt-ST-*/bin/Telegram/Telegram.ipa; do
-            cp "$f" $OUTPUT_PATH/
-          done
+          ls -la build/artifacts
 
-          # collect dsym
-          mkdir -p build/DSYMs
-          for f in bazel-out/applebin_ios-ios_arm*-opt-ST-*/bin/Telegram/*.dSYM; do
-            cp -R "$f" build/DSYMs/
-          done
-          zip -r "./$OUTPUT_PATH/Telegram.DSYMs.zip" build/DSYMs 1>/dev/null
+      # saved even when the build fails, so the next run resumes from what was already compiled
+      - name: Save bazel cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.BAZEL_CACHE_DIR }}
+          key: bazel-${{ runner.os }}-${{ runner.arch }}-xcode${{ env.XCODE_VERSION }}-${{ github.run_id }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

@@ -640,9 +640,21 @@ private func extractAccountManagerState(records: AccountRecordsView<TelegramAcco
             isICloudEnabled: buildConfig.isICloudEnabled
         )
         
-        guard let appGroupUrl = maybeAppGroupUrl else {
-            self.mainWindow?.presentNative(UIAlertController(title: nil, message: "Error 2", preferredStyle: .alert))
-            return true
+        let appGroupUrl: URL
+        if let maybeAppGroupUrl {
+            appGroupUrl = maybeAppGroupUrl
+        } else {
+            // Sideloading tools often re-sign the app without the app group entitlement (or with a renamed group).
+            // Fall back to the app's private container so the app still launches; extensions won't share its data.
+            let fallbackUrl = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("app-group-fallback", isDirectory: true)
+            do {
+                try FileManager.default.createDirectory(at: fallbackUrl, withIntermediateDirectories: true)
+            } catch {
+                self.window?.makeKeyAndVisible()
+                self.mainWindow?.presentNative(UIAlertController(title: nil, message: "Error 2", preferredStyle: .alert))
+                return true
+            }
+            appGroupUrl = fallbackUrl
         }
         
         var isDebugConfiguration = false
