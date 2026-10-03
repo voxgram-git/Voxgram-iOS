@@ -9,11 +9,12 @@ import TelegramUIPreferences
 import TelegramNotices
 import AccountContext
 
-private let baseTelegramMePaths = ["telegram.me", "t.me", "telegram.dog"]
+private let baseTelegramMePaths = ["voxgram.fun", "telegram.me", "t.me", "telegram.dog"]
 private let baseTelegraPhPaths = [
     "telegra.ph/",
     "te.legra.ph/",
     "graph.org/",
+    "voxgram.fun/iv?",
     "t.me/iv?",
     "telegram.org/blog/",
     "telegram.org/tour/"
@@ -226,7 +227,7 @@ public func parseInternalUrl(sharedContext: SharedAccountContext, context: Accou
                             }
                         }
                         if let _ = url {
-                            return .internalInstantView(url: "https://t.me/\(query)")
+                            return .internalInstantView(url: "https://voxgram.fun/\(query)")
                         }
                     } else if peerName == "contact" {
                         var code: String?
@@ -288,7 +289,7 @@ public func parseInternalUrl(sharedContext: SharedAccountContext, context: Accou
                             }
                         }
                         if let _ = token {
-                            return .oauth(url: "https://t.me/\(query)")
+                            return .oauth(url: "https://voxgram.fun/\(query)")
                         }
                     } else {
                         for queryItem in queryItems {

@@ -276,7 +276,7 @@ private final class CocoonInfoSheetContent: CombinedComponent {
                             }
                             switch link {
                             case "telegram":
-                                component.context.sharedContext.handleTextLinkAction(context: component.context, peerId: nil, navigateDisposable: navigateDisposable, controller: controller, action: .tap, itemLink: .url(url: "https://t.me/cocoon", concealed: false))
+                                component.context.sharedContext.handleTextLinkAction(context: component.context, peerId: nil, navigateDisposable: navigateDisposable, controller: controller, action: .tap, itemLink: .url(url: "https://voxgram.fun/cocoon", concealed: false))
                             case "web":
                                 component.context.sharedContext.openExternalUrl(context: component.context, urlContext: .generic, url: "https://cocoon.org", forceExternal: true, presentationData: component.context.sharedContext.currentPresentationData.with { $0 }, navigationController: nil, dismissInput: {})
                             default:
@@ -327,7 +327,7 @@ private final class CocoonInfoSheetContent: CombinedComponent {
                         guard let controller = environment.controller() else {
                             return
                         }
-                        component.context.sharedContext.handleTextLinkAction(context: component.context, peerId: nil, navigateDisposable: navigateDisposable, controller: controller, action: .tap, itemLink: .url(url: "https://t.me/cocoon?direct", concealed: false))
+                        component.context.sharedContext.handleTextLinkAction(context: component.context, peerId: nil, navigateDisposable: navigateDisposable, controller: controller, action: .tap, itemLink: .url(url: "https://voxgram.fun/cocoon?direct", concealed: false))
                     }
                 ),
                 availableSize: CGSize(width: context.availableSize.width - textSideInset * 2.0, height: context.availableSize.height),

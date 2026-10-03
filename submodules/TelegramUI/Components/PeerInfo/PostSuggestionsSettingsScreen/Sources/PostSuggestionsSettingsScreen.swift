@@ -521,7 +521,7 @@ final class PostSuggestionsSettingsScreenComponent: Component {
             }
             
             let address = component.peer?.addressName ?? ""
-            let link = "t.me/\(address)?direct"
+            let link = "voxgram.fun/\(address)?direct"
             let fullLink = "https://\(link)"
             var linkSectionItems: [AnyComponentWithIdentity<Empty>] = []
             linkSectionItems.append(AnyComponentWithIdentity(id: 0, component: AnyComponent(

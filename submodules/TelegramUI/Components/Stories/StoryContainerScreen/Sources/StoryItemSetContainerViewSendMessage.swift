@@ -3836,7 +3836,7 @@ final class StoryItemSetContainerSendMessage: @unchecked(Sendable) {
         case let .starGift(_, slug):
             useGesturePosition = true
             let action = {
-                let _ = openUserGeneratedUrl(context: component.context, peerId: nil, url: "https://t.me/nft/\(slug)", concealed: false, skipUrlAuth: false, skipConcealedAlert: false, forceDark: true, present: { [weak controller] c in
+                let _ = openUserGeneratedUrl(context: component.context, peerId: nil, url: "https://voxgram.fun/nft/\(slug)", concealed: false, skipUrlAuth: false, skipConcealedAlert: false, forceDark: true, present: { [weak controller] c in
                     controller?.present(c, in: .window(.root))
                 }, openResolved: { [weak self, weak view] resolved in
                     guard let self, let view else {

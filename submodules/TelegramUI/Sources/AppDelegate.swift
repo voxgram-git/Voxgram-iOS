@@ -169,6 +169,18 @@ private enum QueuedWakeup: Int32 {
     case backgroundLocation
 }
 
+/// Voxgram registers its own vg:// URL scheme next to tg://. Rewrite vg:// to tg:// on entry so the existing tg:// handling applies unchanged.
+private func normalizedAppSchemeUrl(_ url: URL) -> URL {
+    guard let scheme = url.scheme, scheme.lowercased() == "vg" else {
+        return url
+    }
+    guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+        return url
+    }
+    components.scheme = "tg"
+    return components.url ?? url
+}
+
 final class SharedApplicationContext {
     let sharedContext: SharedAccountContextImpl
     let notificationManager: SharedNotificationManager
@@ -2497,7 +2509,7 @@ private func extractAccountManagerState(records: AccountRecordsView<TelegramAcco
     }
     
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        guard self.openUrlInProgress != url else {
+        guard self.openUrlInProgress != normalizedAppSchemeUrl(url) else {
             return true
         }
         
@@ -2511,6 +2523,7 @@ private func extractAccountManagerState(records: AccountRecordsView<TelegramAcco
     }
     
     private func openUrl(url: URL) {
+        let url = normalizedAppSchemeUrl(url)
         let _ = (self.sharedContextPromise.get()
         |> take(1)
         |> mapToSignal { sharedApplicationContext -> Signal<(SharedAccountContextImpl, AuthorizedApplicationContext?, UnauthorizedApplicationContext?), NoError> in
@@ -2820,6 +2833,7 @@ private func extractAccountManagerState(records: AccountRecordsView<TelegramAcco
     
     private var openUrlInProgress: URL?
     private func openUrlWhenReady(accountId: AccountRecordId? = nil, url: URL, external: Bool = false) {
+        let url = normalizedAppSchemeUrl(url)
         self.openUrlInProgress = url
         
         let signal = self.sharedContextPromise.get()

@@ -68,7 +68,7 @@ extension ChatControllerImpl {
                         }
                     }
                     timestampSuffix = "?t=\(startAtTimestampString)"
-                    let inputCopyText = "https://t.me/\(addressName)/\(message.id.id)\(timestampSuffix)"
+                    let inputCopyText = "https://voxgram.fun/\(addressName)/\(message.id.id)\(timestampSuffix)"
                     UIPasteboard.general.string = inputCopyText
                 } else {
                     UIPasteboard.general.string = timecode

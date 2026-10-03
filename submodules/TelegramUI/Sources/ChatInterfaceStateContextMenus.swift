@@ -675,7 +675,7 @@ func contextMenuForChatPresentationInterfaceState(chatPresentationInterfaceState
             }
             
             if let author = message.author, let addressName = author.addressName {
-                let link = "https://t.me/\(addressName)"
+                let link = "https://voxgram.fun/\(addressName)"
                 actions.append(.action(ContextMenuActionItem(text: chatPresentationInterfaceState.strings.Conversation_ContextMenuCopyLink, icon: { theme in
                     return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Link"), color: theme.actionSheet.primaryTextColor)
                 }, action: { _, f in

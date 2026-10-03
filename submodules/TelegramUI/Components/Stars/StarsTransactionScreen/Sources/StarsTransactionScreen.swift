@@ -1126,7 +1126,7 @@ private final class StarsTransactionSheetContent: CombinedComponent {
                     component: AnyComponent(
                         Button(
                             content: AnyComponent(
-                                MultilineTextComponent(text: .plain(NSAttributedString(string: "t.me/\(peerName)/\(messageId.id)", font: tableFont, textColor: tableLinkColor)))
+                                MultilineTextComponent(text: .plain(NSAttributedString(string: "voxgram.fun/\(peerName)/\(messageId.id)", font: tableFont, textColor: tableLinkColor)))
                             ),
                             action: {
                                 component.openMessage(messageId)

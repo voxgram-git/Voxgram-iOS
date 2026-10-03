@@ -1312,9 +1312,9 @@ public final class StarsTransactionsScreen: ViewControllerComponentContainer {
                     }
                 } else {
                     if let inviteHash = subscription.inviteHash {
-                        self.context.sharedContext.handleTextLinkAction(context: self.context, peerId: nil, navigateDisposable: self.navigateDisposable, controller: self, action: .tap, itemLink: .url(url: "https://t.me/+\(inviteHash)", concealed: false))
+                        self.context.sharedContext.handleTextLinkAction(context: self.context, peerId: nil, navigateDisposable: self.navigateDisposable, controller: self, action: .tap, itemLink: .url(url: "https://voxgram.fun/+\(inviteHash)", concealed: false))
                     } else if let invoiceSlug = subscription.invoiceSlug {
-                        self.context.sharedContext.handleTextLinkAction(context: self.context, peerId: nil, navigateDisposable: self.navigateDisposable, controller: self, action: .tap, itemLink: .url(url: "https://t.me/$\(invoiceSlug)", concealed: false))
+                        self.context.sharedContext.handleTextLinkAction(context: self.context, peerId: nil, navigateDisposable: self.navigateDisposable, controller: self, action: .tap, itemLink: .url(url: "https://voxgram.fun/$\(invoiceSlug)", concealed: false))
                     }
                 }
             })

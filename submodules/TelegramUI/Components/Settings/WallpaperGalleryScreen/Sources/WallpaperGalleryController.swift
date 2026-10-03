@@ -1129,7 +1129,7 @@ public class WallpaperGalleryController: ViewController {
                             optionsString = "?\(options.joined(separator: "&"))"
                         }
 
-                        let shareController = context.sharedContext.makeShareController(context: context, params: ShareControllerParams(subject: .url("https://t.me/bg/\(file.slug)\(optionsString)"), actionCompleted: actionCompleted))
+                        let shareController = context.sharedContext.makeShareController(context: context, params: ShareControllerParams(subject: .url("https://voxgram.fun/bg/\(file.slug)\(optionsString)"), actionCompleted: actionCompleted))
                         self?.present(shareController, in: .window(.root), blockInteraction: true)
                     }
                 })
@@ -1164,10 +1164,10 @@ public class WallpaperGalleryController: ViewController {
                     optionsString = "?\(options.joined(separator: "&"))"
                 }
 
-                let controller = context.sharedContext.makeShareController(context: context, params: ShareControllerParams(subject: .url("https://t.me/bg/\(file.slug)\(optionsString)"), actionCompleted: actionCompleted))
+                let controller = context.sharedContext.makeShareController(context: context, params: ShareControllerParams(subject: .url("https://voxgram.fun/bg/\(file.slug)\(optionsString)"), actionCompleted: actionCompleted))
                 self.present(controller, in: .window(.root), blockInteraction: true)
             case let .color(color):
-                let controller = context.sharedContext.makeShareController(context: context, params: ShareControllerParams(subject: .url("https://t.me/bg/\(UIColor(rgb: color).hexString)"), actionCompleted: actionCompleted))
+                let controller = context.sharedContext.makeShareController(context: context, params: ShareControllerParams(subject: .url("https://voxgram.fun/bg/\(UIColor(rgb: color).hexString)"), actionCompleted: actionCompleted))
                 self.present(controller, in: .window(.root), blockInteraction: true)
             case let .gradient(gradient):
                 var colorsString = ""
@@ -1183,7 +1183,7 @@ public class WallpaperGalleryController: ViewController {
                     colorsString.append(UIColor(rgb: color).hexString)
                 }
 
-                let controller = context.sharedContext.makeShareController(context: context, params: ShareControllerParams(subject: .url("https://t.me/bg/\(colorsString)"), actionCompleted: actionCompleted))
+                let controller = context.sharedContext.makeShareController(context: context, params: ShareControllerParams(subject: .url("https://voxgram.fun/bg/\(colorsString)"), actionCompleted: actionCompleted))
                 self.present(controller, in: .window(.root), blockInteraction: true)
             default:
                 break

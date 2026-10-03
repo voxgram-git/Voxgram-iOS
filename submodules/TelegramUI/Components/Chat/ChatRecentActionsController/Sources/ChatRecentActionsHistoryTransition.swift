@@ -217,12 +217,12 @@ struct ChatRecentActionsEntry: Comparable, Identifiable {
                 var previousAttributes: [MessageAttribute] = []
                 var attributes: [MessageAttribute] = []
                 
-                let prevText = "https://t.me/\(prev)"
+                let prevText = "https://voxgram.fun/\(prev)"
                 previousAttributes.append(TextEntitiesMessageAttribute(entities: [MessageTextEntity(range: 0 ..< prevText.count, type: .Url)]))
                 
                 let text: String
                 if !new.isEmpty {
-                    text = "https://t.me/\(new)"
+                    text = "https://voxgram.fun/\(new)"
                     attributes.append(TextEntitiesMessageAttribute(entities: [MessageTextEntity(range: 0 ..< text.count, type: .Url)]))
                 } else {
                     text = self.presentationData.strings.Channel_AdminLog_EmptyMessageText
@@ -272,7 +272,7 @@ struct ChatRecentActionsEntry: Comparable, Identifiable {
                 
                 var prevText: String = ""
                 for username in prev {
-                    let link = "https://t.me/\(username)"
+                    let link = "https://voxgram.fun/\(username)"
                     prevTextEntities.append(MessageTextEntity(range: prevText.count ..< prevText.count + link.count, type: .Url))
                     prevText.append(link)
                     prevText.append("\n")
@@ -284,7 +284,7 @@ struct ChatRecentActionsEntry: Comparable, Identifiable {
                 var text: String = ""
                 if !new.isEmpty {
                     for username in new {
-                        let link = "https://t.me/\(username)"
+                        let link = "https://voxgram.fun/\(username)"
                         textEntities.append(MessageTextEntity(range: text.count ..< text.count + link.count, type: .Url))
                         text.append(link)
                         text.append("\n")
