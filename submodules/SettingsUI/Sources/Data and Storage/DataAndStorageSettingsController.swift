@@ -967,7 +967,7 @@ public func dataAndStorageController(context: AccountContext, focusOnItemTag: Da
         let webBrowserSettings = sharedData.entries[ApplicationSpecificSharedDataKeys.webBrowserSettings]?.get(WebBrowserSettings.self) ?? WebBrowserSettings.defaultSettings
         let mediaSettings = sharedData.entries[ApplicationSpecificSharedDataKeys.mediaDisplaySettings]?.get(MediaDisplaySettings.self) ?? MediaDisplaySettings.defaultSettings
         
-        let options = availableOpenInOptions(context: context, item: .url(url: "https://telegram.org"))
+        let options = availableOpenInOptions(context: context, item: .url(url: "https://voxgram.fun"))
         let defaultWebBrowser: String
         if let option = options.first(where: { $0.identifier == webBrowserSettings.defaultWebBrowser }) {
             defaultWebBrowser = option.title

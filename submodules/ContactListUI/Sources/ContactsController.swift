@@ -329,7 +329,7 @@ public class ContactsController: ViewController {
         
         self.contactsNode.contactListNode.openPrivacyPolicy = { [weak self] in
             if let strongSelf = self {
-                strongSelf.context.sharedContext.openExternalUrl(context: strongSelf.context, urlContext: .generic, url: "https://telegram.org/privacy", forceExternal: true, presentationData: strongSelf.presentationData, navigationController: strongSelf.navigationController as? NavigationController, dismissInput: {})
+                strongSelf.context.sharedContext.openExternalUrl(context: strongSelf.context, urlContext: .generic, url: "https://voxgram.fun/legal/privacy", forceExternal: true, presentationData: strongSelf.presentationData, navigationController: strongSelf.navigationController as? NavigationController, dismissInput: {})
             }
         }
         

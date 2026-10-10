@@ -124,29 +124,51 @@ public final class PresentationData: Equatable {
     }
 }
 
+private let voxgramLinkRewrites: [(NSRegularExpression, String)] = [
+    ("https?://(www\\.)?telegram\\.org/faq[^\\s\")\\]]*", "https://voxgram.fun/#faq"),
+    ("https?://(www\\.)?telegram\\.org/tos/(mini-apps|bot-developers)[^\\s\")\\]]*", "https://voxgram.fun/legal/bots"),
+    ("https?://core\\.telegram\\.org/bots[^\\s\")\\]]*", "https://voxgram.fun/legal/bots"),
+    ("https?://(www\\.)?telegram\\.org/privacy[^\\s\")\\]]*", "https://voxgram.fun/legal/privacy"),
+    ("https?://(www\\.)?telegram\\.org/(tos|terms)[^\\s\")\\]]*", "https://voxgram.fun/legal/terms"),
+    ("https?://([a-z]+\\.)?telegram\\.org[^\\s\")\\]]*", "https://voxgram.fun"),
+    ("(?<![A-Za-z0-9_./])([a-z]+\\.)?telegram\\.org(?![A-Za-z0-9])", "voxgram.fun"),
+    ("(?<![A-Za-z0-9_.])t\\.me/", "voxgram.fun/"),
+].map { item -> (NSRegularExpression, String) in
+    return (try! NSRegularExpression(pattern: item.0, options: [.caseInsensitive]), item.1)
+}
+
+/// Localizations are downloaded from the server and still reference Telegram; point their links and branding at Voxgram.
+public func voxgramRebrandedLocalizedString(_ value: String) -> String {
+    var result = value.replacingOccurrences(of: "Telegram", with: "Voxgram")
+    for (pattern, replacement) in voxgramLinkRewrites {
+        result = pattern.stringByReplacingMatches(in: result, options: [], range: NSRange(result.startIndex..., in: result), withTemplate: NSRegularExpression.escapedTemplate(for: replacement))
+    }
+    return result
+}
+
 public func dictFromLocalization(_ value: Localization) -> [String: String] {
     var dict: [String: String] = [:]
     for entry in value.entries {
         switch entry {
             case let .string(key, value):
-                dict[key] = value
+                dict[key] = voxgramRebrandedLocalizedString(value)
             case let .pluralizedString(key, zero, one, two, few, many, other):
                 if let zero = zero {
-                    dict["\(key)_zero"] = zero
+                    dict["\(key)_zero"] = voxgramRebrandedLocalizedString(zero)
                 }
                 if let one = one {
-                    dict["\(key)_1"] = one
+                    dict["\(key)_1"] = voxgramRebrandedLocalizedString(one)
                 }
                 if let two = two {
-                    dict["\(key)_2"] = two
+                    dict["\(key)_2"] = voxgramRebrandedLocalizedString(two)
                 }
                 if let few = few {
-                    dict["\(key)_3_10"] = few
+                    dict["\(key)_3_10"] = voxgramRebrandedLocalizedString(few)
                 }
                 if let many = many {
-                    dict["\(key)_many"] = many
+                    dict["\(key)_many"] = voxgramRebrandedLocalizedString(many)
                 }
-                dict["\(key)_any"] = other
+                dict["\(key)_any"] = voxgramRebrandedLocalizedString(other)
         }
     }
     return dict

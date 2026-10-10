@@ -570,7 +570,9 @@ func initializedNetwork(accountId: AccountRecordId, arguments: NetworkInitializa
             #endif
             
             if !supplementary {
-                context.setDiscoverBackupAddressListSignal(MTBackupAddressSignals.fetchBackupIps(testingEnvironment, currentContext: context, additionalSource: wrappedAdditionalSource, phoneNumber: phoneNumber, mainDatacenterId: datacenterId))
+                // Backup address discovery resolves Telegram's own fallback IPs (apv3.stel.com via Google/Cloudflare DNS),
+                // which don't apply to the Voxgram server, so it is disabled.
+                let _ = wrappedAdditionalSource
                 let externalRequestVerificationStream = arguments.externalRequestVerificationStream
                 context.setExternalRequestVerification({ nonce in
                     return MTSignal(generator: { subscriber in
