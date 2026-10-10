@@ -251,7 +251,7 @@ NSString *const TGUserInfoControllerIdentifier = @"TGUserInfoController";
     NSMutableArray *handles = [[NSMutableArray alloc] init];
     if (_channelModel.userName.length > 0)
     {
-        [handles addObject:[[TGUserHandle alloc] initWithHandle:[NSString stringWithFormat:@"t.me/%@", self->_channelModel.userName] type:TGLocalized(@"Channel.LinkItem") handleType:TGUserHandleTypeUndefined data:nil]];
+        [handles addObject:[[TGUserHandle alloc] initWithHandle:[NSString stringWithFormat:@"voxgram.fun/%@", self->_channelModel.userName] type:TGLocalized(@"Channel.LinkItem") handleType:TGUserHandleTypeUndefined data:nil]];
     }
     if (_channelModel.about.length > 0)
     {

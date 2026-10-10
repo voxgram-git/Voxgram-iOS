@@ -214,7 +214,7 @@ extension PeerInfoScreenNode {
         if value.hasPrefix("https://") {
             url = value
         } else {
-            url = "https://t.me/\(value)"
+            url = "https://voxgram.fun/\(value)"
         }
         
         let openShare: (TelegramCollectibleItemInfo?) -> Void = { [weak self] collectibleItemInfo in

@@ -346,7 +346,7 @@ extension VideoChatScreenComponent.View {
                             if let link = inviteLinks?.listenerLink {
                                 return link
                             } else if let peer = peer, let addressName = peer.addressName, !addressName.isEmpty {
-                                return "https://t.me/\(addressName)"
+                                return "https://voxgram.fun/\(addressName)"
                             } else if let link = exportedInvitation?.link {
                                 return link
                             } else {

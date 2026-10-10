@@ -1,6 +1,7 @@
 import Foundation
 
 private let whitelistedHosts: Set<String> = Set([
+    "voxgram.fun",
     "t.me",
     "telegram.me",
     "telegra.ph",

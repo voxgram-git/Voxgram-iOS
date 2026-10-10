@@ -238,7 +238,7 @@ private enum WebBrowserSettingsControllerEntry: ItemListNodeEntry {
 private func webBrowserSettingsControllerEntries(context: AccountContext, presentationData: PresentationData, settings: WebBrowserSettings) -> [WebBrowserSettingsControllerEntry] {
     var entries: [WebBrowserSettingsControllerEntry] = []
     
-    let options = availableOpenInOptions(context: context, item: .url(url: "http://telegram.org"))
+    let options = availableOpenInOptions(context: context, item: .url(url: "https://voxgram.fun"))
     
     entries.append(.browserHeader(presentationData.theme, presentationData.strings.WebBrowser_OpenLinksIn_Title))
     entries.append(.browser(presentationData.theme, presentationData.strings.WebBrowser_Telegram, nil, nil, settings.defaultWebBrowser == nil, 0))

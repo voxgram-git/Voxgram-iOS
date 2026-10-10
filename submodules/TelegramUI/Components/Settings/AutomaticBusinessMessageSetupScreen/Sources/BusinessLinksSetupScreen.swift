@@ -473,9 +473,9 @@ final class BusinessLinksSetupScreenComponent: Component {
                             
                             let linkValue: String
                             if url == "phone", let phoneNumber = component.initialData.accountPeer?.phone {
-                                linkValue = "t.me/+\(phoneNumber)"
+                                linkValue = "voxgram.fun/+\(phoneNumber)"
                             } else if url == "username", let addressName = component.initialData.accountPeer?.addressName {
-                                linkValue = "t.me/\(addressName)"
+                                linkValue = "voxgram.fun/\(addressName)"
                             } else {
                                 return
                             }

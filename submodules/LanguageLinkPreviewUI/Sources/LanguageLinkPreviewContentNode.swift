@@ -62,7 +62,7 @@ final class LanguageLinkPreviewContentNode: ASDisplayNode, ShareContentContainer
                 if localizationInfo.platformUrl.isEmpty {
                     url = localizationInfo.platformUrl
                 } else {
-                    url = "https://translations.telegram.org/\(localizationInfo.languageCode)/"
+                    url = "https://voxgram.fun/"
                 }
                 openTranslationUrl(url)
             }

@@ -546,7 +546,7 @@ private final class ImportStickerPackTitleAlertContentNode: AlertContentNode {
                 
         self.inputFieldNode = ImportStickerPackTitleInputFieldNode(theme: ptheme, placeholder: placeholder, maxLength: maxLength, keyboardType: asciiOnly ? .asciiCapable : .default, returnKeyType: asciiOnly ? .done : .next, hasClearButton: hasClearButton)
         if asciiOnly {
-            self.inputFieldNode.prefix = "t.me/addstickers/"
+            self.inputFieldNode.prefix = "voxgram.fun/addstickers/"
         }
         self.inputFieldNode.text = value ?? ""
         

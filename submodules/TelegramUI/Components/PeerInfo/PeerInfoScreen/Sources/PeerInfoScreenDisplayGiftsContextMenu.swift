@@ -108,7 +108,7 @@ extension PeerInfoScreenNode {
                     return generateTintedImage(image: UIImage(bundleImageName: "Chat/Context Menu/Forward"), color: theme.contextMenu.primaryColor)
                 }, action: { [weak self] _, f in
                     f(.default)
-                    self?.openShareLink(url: "https://t.me/\(addressName)/c/\(id)")
+                    self?.openShareLink(url: "https://voxgram.fun/\(addressName)/c/\(id)")
                 }))
                 if items.isEmpty {
                     items.append(shareAction)

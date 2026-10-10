@@ -456,7 +456,7 @@ public final class ThemeGridController: ViewController {
                 if !string.isEmpty {
                     string.append("\n")
                 }
-                string.append("https://t.me/bg/\(item)")
+                string.append("https://voxgram.fun/bg/\(item)")
             }
         }
         let subject: ShareControllerSubject

@@ -293,7 +293,7 @@ public func deleteAccountOptionsController(context: AccountContext, navigationCo
         
         var faqUrl = presentationData.strings.DeleteAccount_DeleteMessagesURL
         if faqUrl == "DeleteAccount.DeleteMessagesURL" || faqUrl.isEmpty {
-            faqUrl = "https://telegram.org/faq#q-can-i-delete-my-messages"
+            faqUrl = "https://voxgram.fun/#faq"
         }
         let resolvedUrl = resolveInstantViewUrl(account: context.account, url: faqUrl)
         |> mapToSignal { result -> Signal<ResolvedUrl, NoError> in
@@ -334,7 +334,7 @@ public func deleteAccountOptionsController(context: AccountContext, navigationCo
         
         var faqUrl = presentationData.strings.Settings_FAQ_URL
         if faqUrl == "Settings.FAQ_URL" || faqUrl.isEmpty {
-            faqUrl = "https://telegram.org/faq#general"
+            faqUrl = "https://voxgram.fun/#faq"
         }
         let resolvedUrl = resolveInstantViewUrl(account: context.account, url: faqUrl)
         |> mapToSignal { result -> Signal<ResolvedUrl, NoError> in

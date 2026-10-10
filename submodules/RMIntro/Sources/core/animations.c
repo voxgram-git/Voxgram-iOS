@@ -424,8 +424,9 @@ void on_surface_created() {
 
     // Telegram
     telegram_sphere = create_textured_rectangle(CSizeMake(148, 148), telegram_sphere_texture);
-    telegram_plane = create_textured_rectangle(CSizeMake(82, 74), telegram_plane_texture);
-    telegram_plane.params.anchor=xyzMake(6, -5, 0);
+    // The Voxgram logo glyph texture covers the whole sphere, so it is drawn at the sphere's size without an offset.
+    telegram_plane = create_textured_rectangle(CSizeMake(148, 148), telegram_plane_texture);
+    telegram_plane.params.anchor=xyzMake(0, 0, 0);
 
 
 

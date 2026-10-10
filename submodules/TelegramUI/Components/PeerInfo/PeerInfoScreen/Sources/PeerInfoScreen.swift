@@ -2449,7 +2449,7 @@ final class PeerInfoScreenNode: ViewControllerTracingNode, PeerInfoScreenNodePro
                 }
             }
             if !found {
-                self.openUrl(url: "https://t.me/nft/\(slug)", concealed: false, external: false)
+                self.openUrl(url: "https://voxgram.fun/nft/\(slug)", concealed: false, external: false)
             }
         }
         
@@ -3673,7 +3673,7 @@ final class PeerInfoScreenNode: ViewControllerTracingNode, PeerInfoScreenNodePro
                 return
             }
             if case let .user(peer) = peer, let username = peer.addressName {
-                strongSelf.openShareLink(url: "https://t.me/\(username)")
+                strongSelf.openShareLink(url: "https://voxgram.fun/\(username)")
             }
         })
     }

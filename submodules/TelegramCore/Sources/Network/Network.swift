@@ -530,11 +530,11 @@ func initializedNetwork(accountId: AccountRecordId, arguments: NetworkInitializa
             
             
             seedAddressList = [
-                1: ["192.168.0.96"],
-                2: ["192.168.0.96"],
-                3: ["192.168.0.96"],
-                4: ["192.168.0.96"],
-                5: ["192.168.0.96"]
+                1: ["31.77.10.99"],
+                2: ["31.77.10.99"],
+                3: ["31.77.10.99"],
+                4: ["31.77.10.99"],
+                5: ["31.77.10.99"]
             ]
             
             
@@ -570,7 +570,9 @@ func initializedNetwork(accountId: AccountRecordId, arguments: NetworkInitializa
             #endif
             
             if !supplementary {
-                context.setDiscoverBackupAddressListSignal(MTBackupAddressSignals.fetchBackupIps(testingEnvironment, currentContext: context, additionalSource: wrappedAdditionalSource, phoneNumber: phoneNumber, mainDatacenterId: datacenterId))
+                // Backup address discovery resolves Telegram's own fallback IPs (apv3.stel.com via Google/Cloudflare DNS),
+                // which don't apply to the Voxgram server, so it is disabled.
+                let _ = wrappedAdditionalSource
                 let externalRequestVerificationStream = arguments.externalRequestVerificationStream
                 context.setExternalRequestVerification({ nonce in
                     return MTSignal(generator: { subscriber in
