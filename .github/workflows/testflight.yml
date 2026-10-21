@@ -27,22 +27,42 @@ jobs:
       SOURCE_DIR: /Users/Shared/telegram-ios
 
     steps:
+      # Two setups are supported (docs/testflight.md):
+      #  - API: a team App Store Connect API key creates the profiles and uploads the build
+      #  - manual: profiles made by the account owner (IOS_PROFILES_ZIP_BASE64), upload with an Apple ID
+      #    app-specific password
       - name: Check secrets
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           IOS_DIST_CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+          IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+          IOS_PROFILES_ZIP_BASE64: ${{ secrets.IOS_PROFILES_ZIP_BASE64 }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
         run: |
-          missing=""
-          for name in APPLE_TEAM_ID IOS_DIST_CERT_P12_BASE64 ASC_KEY_ID ASC_ISSUER_ID ASC_PRIVATE_KEY; do
-            if [ -z "${!name}" ]; then missing="$missing $name"; fi
-          done
+          check() {
+            local missing=""
+            for name in "$@"; do
+              if [ -z "${!name}" ]; then missing="$missing $name"; fi
+            done
+            echo "$missing"
+          }
+          if [ -n "$IOS_PROFILES_ZIP_BASE64" ]; then
+            mode=manual
+            missing=$(check APPLE_TEAM_ID IOS_DIST_CERT_P12_BASE64 IOS_DIST_CERT_PASSWORD APPLE_ID APPLE_APP_PASSWORD)
+          else
+            mode=api
+            missing=$(check APPLE_TEAM_ID IOS_DIST_CERT_P12_BASE64 IOS_DIST_CERT_PASSWORD ASC_KEY_ID ASC_ISSUER_ID ASC_PRIVATE_KEY)
+          fi
           if [ -n "$missing" ]; then
-            echo "::error::Missing repository secrets:$missing (see docs/testflight.md)"
+            echo "::error::Missing repository secrets for the $mode setup:$missing (see docs/testflight.md)"
             exit 1
           fi
+          echo "SIGNING_MODE=$mode" >> $GITHUB_ENV
+          echo "Signing setup: $mode"
 
       - uses: actions/checkout@v4
         with:
@@ -81,26 +101,39 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+          IOS_PROFILES_ZIP_BASE64: ${{ secrets.IOS_PROFILES_ZIP_BASE64 }}
         run: |
           set -e
           SIGNING_DIR="$RUNNER_TEMP/signing"
-          mkdir -p "$SIGNING_DIR/codesigning/certs" "$SIGNING_DIR/codesigning/profiles" ~/.appstoreconnect/private_keys
+          PROFILES_DIR="$SIGNING_DIR/codesigning/profiles"
+          mkdir -p "$SIGNING_DIR/codesigning/certs" "$PROFILES_DIR"
           echo "SIGNING_DIR=$SIGNING_DIR" >> $GITHUB_ENV
 
           echo "$IOS_DIST_CERT_P12_BASE64" | base64 --decode > "$SIGNING_DIR/distribution.p12"
-          printf '%s\n' "$ASC_PRIVATE_KEY" > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
-
-          python3 -m venv "$RUNNER_TEMP/venv"
-          "$RUNNER_TEMP/venv/bin/pip" install --quiet 'pyjwt[crypto]'
-
           BUNDLE_ID=$(python3 -c 'import json;print(json.load(open("build-system/appstore-configuration.json"))["bundle_id"])')
-          "$RUNNER_TEMP/venv/bin/python" .github/scripts/appstoreconnect_profiles.py \
-            --bundle-id "$BUNDLE_ID" \
-            --key-id "$ASC_KEY_ID" \
-            --issuer-id "$ASC_ISSUER_ID" \
-            --private-key-path ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8 \
-            --p12-path "$SIGNING_DIR/distribution.p12" \
-            --output "$SIGNING_DIR/codesigning/profiles"
+
+          if [ "$SIGNING_MODE" = "manual" ]; then
+            echo "$IOS_PROFILES_ZIP_BASE64" | base64 --decode > "$SIGNING_DIR/profiles.zip"
+            # flatten: the zip may contain the profiles in a folder
+            unzip -j -o "$SIGNING_DIR/profiles.zip" '*.mobileprovision' -d "$PROFILES_DIR"
+            python3 .github/scripts/appstoreconnect_profiles.py \
+              --check-dir "$PROFILES_DIR" \
+              --bundle-id "$BUNDLE_ID" \
+              --team-id "$APPLE_TEAM_ID" \
+              --p12-path "$SIGNING_DIR/distribution.p12"
+          else
+            mkdir -p ~/.appstoreconnect/private_keys
+            printf '%s\n' "$ASC_PRIVATE_KEY" > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+            python3 -m venv "$RUNNER_TEMP/venv"
+            "$RUNNER_TEMP/venv/bin/pip" install --quiet 'pyjwt[crypto]'
+            "$RUNNER_TEMP/venv/bin/python" .github/scripts/appstoreconnect_profiles.py \
+              --bundle-id "$BUNDLE_ID" \
+              --key-id "$ASC_KEY_ID" \
+              --issuer-id "$ASC_ISSUER_ID" \
+              --private-key-path ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8 \
+              --p12-path "$SIGNING_DIR/distribution.p12" \
+              --output "$PROFILES_DIR"
+          fi
 
           # same configuration as the CI build, but signed by our team
           python3 - "$SIGNING_DIR/configuration.json" <<'EOF'
@@ -162,13 +195,25 @@ jobs:
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          ASC_PROVIDER: ${{ secrets.ASC_PROVIDER }}
         run: |
           set -o pipefail
+          if [ "$SIGNING_MODE" = "manual" ]; then
+            # altool can't upload with an individual API key, so the manual setup uses the Apple ID of a user
+            # who only has access to this app
+            auth=(--username "$APPLE_ID" --password "$APPLE_APP_PASSWORD")
+            # an Apple ID that belongs to several teams needs the provider short name (see the list below)
+            xcrun altool --list-providers "${auth[@]}" || true
+            if [ -n "$ASC_PROVIDER" ]; then auth+=(--asc-provider "$ASC_PROVIDER"); fi
+          else
+            auth=(--apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID")
+          fi
           # Xcode 26 altool can exit with 0 after a failed upload, so check its output as well
           xcrun altool --upload-app --type ios \
             --file build/artifacts/Telegram.ipa \
-            --apiKey "$ASC_KEY_ID" \
-            --apiIssuer "$ASC_ISSUER_ID" 2>&1 | tee "$RUNNER_TEMP/altool.log"
+            "${auth[@]}" 2>&1 | tee "$RUNNER_TEMP/altool.log"
           if ! grep -qE "UPLOAD SUCCEEDED|No errors uploading" "$RUNNER_TEMP/altool.log"; then
             echo "::error::Upload to App Store Connect failed, see the altool output above"
             exit 1

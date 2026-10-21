@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Prepare App Store provisioning profiles for the app and its extensions via the App Store Connect API.
+"""Prepare App Store provisioning profiles for the app and its extensions.
 
-For every bundle identifier the script makes sure the identifier exists and has the capabilities the build needs,
-then (re)creates an App Store profile that contains the distribution certificate from the given .p12 and writes it
-to the output directory. App group membership can't be assigned through the API, so the script fails with
-instructions if a profile comes back without the app group.
+By default the profiles come from the App Store Connect API: for every bundle identifier the script makes sure the
+identifier exists and has the capabilities the build needs, then (re)creates an App Store profile that contains the
+distribution certificate from the given .p12 and writes it to the output directory. App group membership can't be
+assigned through the API, so the script fails with instructions if a profile comes back without the app group.
+
+With --check-dir the script only validates profiles that were created by hand (one per bundle identifier).
 """
 
 import argparse
@@ -17,8 +19,6 @@ import sys
 import time
 import urllib.error
 import urllib.request
-
-import jwt
 
 API = 'https://api.appstoreconnect.apple.com/v1'
 
@@ -45,6 +45,8 @@ class Client:
         self.token_expiry = 0
 
     def _auth(self):
+        import jwt
+
         now = int(time.time())
         if self.token is None or now > self.token_expiry - 60:
             self.token_expiry = now + 15 * 60
@@ -128,16 +130,67 @@ def profile_entitlements(content_b64):
     return plistlib.loads(out.stdout)['Entitlements']
 
 
+def check_profiles(directory, bundle_id, team_id, p12_serial):
+    """Validate hand-made profiles: one App Store profile per target, with the app group, push and our certificate."""
+    app_group = f'group.{bundle_id}'
+    found = {}
+    for file_name in sorted(os.listdir(directory)):
+        if not file_name.endswith('.mobileprovision'):
+            continue
+        with open(os.path.join(directory, file_name), 'rb') as f:
+            der = f.read()
+        out = subprocess.run(['openssl', 'smime', '-inform', 'der', '-verify', '-noverify'], input=der,
+                             capture_output=True, check=True)
+        profile = plistlib.loads(out.stdout)
+        identifier = profile['Entitlements']['application-identifier'].split('.', 1)[1]
+        found[identifier] = (file_name, profile)
+
+    problems = []
+    for suffix in TARGETS:
+        identifier = bundle_id + suffix
+        if identifier not in found:
+            problems.append(f'no profile for {identifier}')
+            continue
+        file_name, profile = found[identifier]
+        entitlements = profile['Entitlements']
+        if profile.get('TeamIdentifier', [None])[0] != team_id:
+            problems.append(f'{file_name}: team {profile.get("TeamIdentifier")} instead of {team_id}')
+        if profile.get('ProvisionedDevices') or entitlements.get('get-task-allow'):
+            problems.append(f'{file_name}: not an App Store distribution profile')
+        if app_group not in entitlements.get('com.apple.security.application-groups', []):
+            problems.append(f'{file_name}: App Group {app_group} is not enabled for {identifier}')
+        if suffix == '' and 'aps-environment' not in entitlements:
+            problems.append(f'{file_name}: Push Notifications are not enabled for {identifier}')
+        serials = []
+        for cert_der in profile.get('DeveloperCertificates', []):
+            cert = subprocess.run(['openssl', 'x509', '-inform', 'der', '-noout', '-serial'], input=cert_der,
+                                  capture_output=True, check=True)
+            serials.append(cert.stdout.decode().strip().split('=', 1)[1].upper().lstrip('0'))
+        if p12_serial not in serials:
+            problems.append(f'{file_name}: does not include the distribution certificate from the .p12')
+        print(f'{file_name}: {identifier}, expires {profile.get("ExpirationDate")}')
+
+    if problems:
+        raise SystemExit('Provisioning profiles are not usable:\n  ' + '\n  '.join(problems))
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--bundle-id', required=True)
-    parser.add_argument('--key-id', required=True)
-    parser.add_argument('--issuer-id', required=True)
-    parser.add_argument('--private-key-path', required=True)
+    parser.add_argument('--key-id')
+    parser.add_argument('--issuer-id')
+    parser.add_argument('--private-key-path')
     parser.add_argument('--p12-path', required=True)
     parser.add_argument('--p12-password-env', default='IOS_DIST_CERT_PASSWORD')
-    parser.add_argument('--output', required=True)
+    parser.add_argument('--output')
+    parser.add_argument('--check-dir', help='only validate the hand-made profiles in this directory')
+    parser.add_argument('--team-id')
     args = parser.parse_args()
+
+    if args.check_dir:
+        serial = certificate_serial(args.p12_path, os.environ.get(args.p12_password_env, ''))
+        check_profiles(args.check_dir, args.bundle_id, args.team_id, serial)
+        return
 
     with open(args.private_key_path) as f:
         client = Client(args.key_id, args.issuer_id, f.read())
